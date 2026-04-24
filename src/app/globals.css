@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --tracking-tightest: -0.06em;
+  
+  --color-silver-primary: var(--silver-primary);
+  --color-silver-secondary: var(--silver-secondary);
+  --color-steel-accent: var(--steel-accent);
+  
+  --color-background: var(--background);
+  --color-alt-bg: var(--alt-bg);
+  --color-foreground: var(--foreground);
+  --color-text-muted: var(--text-muted);
+  --color-border-subtle: var(--border-subtle);
+  --color-card-bg: var(--card-bg);
+}
+
+:root {
+  /* Default Dark Mode */
+  --background: #080808;
+  --alt-bg: #111111;
+  --foreground: #ffffff;
+  --text-muted: #737373;
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --card-bg: rgba(255, 255, 255, 0.02);
+  
+  --silver-primary: #BCC6CC;
+  --silver-secondary: #E5E4E2;
+  --steel-accent: #71797E;
+}
+
+.light {
+  --background: #ffffff;
+  --alt-bg: #f8f8f8;
+  --foreground: #080808;
+  --text-muted: #525252;
+  --border-subtle: rgba(0, 0, 0, 0.05);
+  --card-bg: rgba(0, 0, 0, 0.02);
+  
+  /* We keep silver/steel the same as they are brand colors, 
+     but we can slightly adjust for contrast if needed */
+  --silver-primary: #71797E; /* Darker steel for light mode */
+  --silver-secondary: #BCC6CC;
+}
+
+html, body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: "Outfit", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+.font-outfit {
+  font-family: "Outfit", sans-serif;
+}
+
+/* Texture Overlay */
+.grainy-overlay::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.05;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  filter: contrast(120%) brightness(120%);
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
