@@ -20,10 +20,10 @@ export default function Hero() {
       {/* Background with Building Plan Overlay - Theme Specific Visibility */}
       <motion.div 
         style={{ scale }}
-        className="absolute inset-0 z-0 bg-[url('/images/Background.jpg')] bg-cover bg-center transition-all duration-700 opacity-70 dark:opacity-50"
+        className="absolute inset-0 z-0 bg-[url('/images/Background.jpg')] bg-cover bg-center transition-all duration-700 opacity-60 dark:opacity-50"
       >
-        <div className="absolute inset-0 bg-[var(--background)]/30 dark:bg-black/40 z-[5]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[var(--background)]/70 via-transparent to-[var(--background)] z-10" />
+        <div className="absolute inset-0 bg-[var(--background)]/70 dark:bg-black/60 z-[5]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[var(--background)]/90 via-[var(--background)]/20 to-[var(--background)] z-10" />
       </motion.div>
 
       <motion.div 

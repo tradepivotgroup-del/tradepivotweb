@@ -38,8 +38,9 @@ export default function Services() {
         <img 
           src="/images/Background.jpg" 
           alt="" 
-          className="w-full h-full object-cover opacity-[0.4] dark:opacity-[0.25] grayscale-[0.05]"
+          className="w-full h-full object-cover opacity-[0.2] dark:opacity-[0.25] grayscale-[0.05]"
         />
+        <div className="absolute inset-0 bg-[var(--alt-bg)]/50 dark:bg-transparent" />
         <div className="absolute inset-0 bg-gradient-to-b from-[var(--alt-bg)] via-transparent to-[var(--alt-bg)]" />
       </div>
 

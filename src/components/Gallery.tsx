@@ -43,10 +43,18 @@ export default function Gallery() {
         const galData = galSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
 
         // Map items to projects
-        const compiledProjects = projData.map((p: any) => ({
-          ...p,
-          images: galData.filter((i: any) => i.projectId === p.id).map((i: any) => i.image)
-        })).filter((p: any) => p.images.length > 0);
+        const compiledProjects = projData.map((p: any) => {
+          const pImages = galData.filter((i: any) => i.projectId === p.id);
+          return {
+            ...p,
+            images: pImages.map((i: any) => i.image),
+            sortDate: p.createdAt ? new Date(p.createdAt).getTime() : 
+                      (pImages.length > 0 ? new Date(pImages[0].createdAt).getTime() : 0)
+          };
+        }).filter((p: any) => p.images.length > 0);
+
+        // Sort projects by newest first
+        compiledProjects.sort((a, b) => b.sortDate - a.sortDate);
 
         setProjects(compiledProjects);
       } catch (err) {

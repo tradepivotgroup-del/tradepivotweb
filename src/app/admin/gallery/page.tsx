@@ -89,9 +89,10 @@ export default function GalleryManager() {
       try {
         const docRef = await addDoc(collection(db, "projects"), {
           name: projectForm.name,
-          description: projectForm.description
+          description: projectForm.description,
+          createdAt: new Date().toISOString()
         });
-        const newProject = { id: docRef.id, name: projectForm.name, description: projectForm.description };
+        const newProject = { id: docRef.id, name: projectForm.name, description: projectForm.description, createdAt: new Date().toISOString() };
         setProjects([...projects, newProject]);
         setSelectedProjectId(newProject.id);
       } catch (e) {
