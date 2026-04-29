@@ -1,16 +1,4 @@
-I want to be integrating animateui for cool animations, use this corousel for each gallery section images:
+this is my facebook page link 
+https://www.facebook.com/profile.php?id=61588953562432
 
-'use client';
-
-import * as React from 'react';
-import { MotionCarousel } from '@/components/animate-ui/components/community/motion-carousel';
-import { EmblaOptionsType } from 'embla-carousel';
-
-export const MotionCarouselDemo = () => {
-  const OPTIONS: EmblaOptionsType = { loop: true };
-  const SLIDE_COUNT = 6;
-  const SLIDES = Array.from(Array(SLIDE_COUNT).keys());
-
-  return <MotionCarousel slides={SLIDES} options={OPTIONS} />;
-};
-
+i need to add this link to a facebook icon on the contacts section and the footer then link that url for my fb page

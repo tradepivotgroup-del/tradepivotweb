@@ -24,6 +24,16 @@ export default function Footer() {
                 <div className="lg:w-1/3">
                     <h3 className="text-4xl md:text-5xl font-black uppercase tracking-tighter">Get In Touch</h3>
                     <p className="text-[12px] md:text-[14px] uppercase tracking-widest text-[var(--text-muted)] font-black mt-4">We build the undisputed.</p>
+                    <div className="flex gap-4 mt-8">
+                        <a 
+                            href="https://www.facebook.com/profile.php?id=61588953562432" 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="w-12 h-12 rounded-full border border-[var(--border-subtle)] flex items-center justify-center hover:bg-[var(--foreground)] hover:text-[var(--background)] transition-all group"
+                        >
+                            <Facebook size={18} className="group-hover:scale-110 transition-transform" />
+                        </a>
+                    </div>
                 </div>
                 <div className="lg:w-2/3">
                     <ContactForm />
@@ -100,7 +110,7 @@ export default function Footer() {
             </div>
             <div className="flex items-center gap-4 mt-4">
                 <a href="#" className="w-10 h-10 rounded-full border border-[var(--border-subtle)] flex items-center justify-center hover:bg-[var(--card-bg)] transition-all"><Instagram size={14} /></a>
-                <a href="#" className="w-10 h-10 rounded-full border border-[var(--border-subtle)] flex items-center justify-center hover:bg-[var(--card-bg)] transition-all"><Facebook size={14} /></a>
+                <a href="https://www.facebook.com/profile.php?id=61588953562432" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-[var(--border-subtle)] flex items-center justify-center hover:bg-[var(--card-bg)] transition-all"><Facebook size={14} /></a>
                 <a href="#" className="w-10 h-10 rounded-full border border-[var(--border-subtle)] flex items-center justify-center hover:bg-[var(--card-bg)] transition-all"><Linkedin size={14} /></a>
             </div>
           </div>
