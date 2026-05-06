@@ -6,7 +6,7 @@ import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy 
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Progress, ProgressLabel, ProgressTrack, ProgressValue, ProgressIndicator } from '@/components/animate-ui/primitives/base/progress';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit3, X, Upload, Save, MapPin, Ruler, CheckCircle2 } from 'lucide-react';
+import { Plus, Trash2, Edit3, X, Upload, Save, MapPin, Ruler, CheckCircle2, Play } from 'lucide-react';
 import Image from 'next/image';
 
 interface Project {
@@ -21,6 +21,7 @@ interface Project {
 }
 
 export default function PortfolioManager() {
+  const isVideoUrl = (url: string) => url?.match(/\.(mp4|webm|ogg|mov)/i);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -164,7 +165,18 @@ export default function PortfolioManager() {
             {projects.map((p) => (
                 <div key={p.id} className="group bg-[var(--card-bg)] rounded-xl border border-[var(--border-subtle)] overflow-hidden flex flex-col">
                     <div className="relative aspect-[4/3] w-full">
-                        <Image unoptimized src={p.image} alt={p.title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                        {isVideoUrl(p.image) ? (
+                            <div className="relative w-full h-full overflow-hidden">
+                                <video src={p.image} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" muted loop playsInline onMouseOver={e => e.currentTarget.play()} onMouseOut={e => e.currentTarget.pause()} />
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                                   <div className="w-12 h-12 rounded-full bg-black/50 text-white flex items-center justify-center backdrop-blur-sm">
+                                       <Play className="w-5 h-5 ml-1 fill-white" />
+                                   </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <Image unoptimized src={p.image} alt={p.title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                        )}
                         <div className="absolute top-4 right-4 flex gap-2">
                             <button onClick={() => openModal(p)} className="p-2.5 bg-white/10 backdrop-blur-md rounded-lg text-white hover:bg-silver-primary hover:text-black transition-all">
                                 <Edit3 size={14} />
@@ -278,7 +290,7 @@ export default function PortfolioManager() {
                                     <label className="text-[9px] uppercase font-black tracking-widest text-[var(--text-muted)] ml-2">Project Image</label>
                                     <div className="relative group/upload h-24 rounded-lg border-2 border-dashed border-[var(--border-subtle)] hover:border-silver-primary transition-all flex flex-col items-center justify-center cursor-pointer">
                                         <input 
-                                            type="file" accept="image/*"
+                                            type="file" accept="image/*,video/*"
                                             onChange={(e) => setImageFile(e.target.files?.[0] || null)}
                                             className="absolute inset-0 opacity-0 cursor-pointer"
                                         />

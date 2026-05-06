@@ -8,17 +8,22 @@ import {
 } from 'embla-carousel'
 import useEmblaCarousel from 'embla-carousel-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Play } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/animate-ui/components/buttons/button'
 
 const TWEEN_FACTOR_BASE = 0.52
 
+interface SlideItem {
+  url: string;
+  type?: 'image' | 'video';
+}
+
 interface MotionCarouselProps {
-  slides: string[]
+  slides: (string | SlideItem)[]
   options?: EmblaOptionsType
   className?: string
-  onItemClick?: (image: string) => void
+  onItemClick?: (item: SlideItem) => void
 }
 
 export const MotionCarousel = ({
@@ -92,31 +97,61 @@ export const MotionCarousel = ({
     [emblaApi]
   )
 
+  const getSlideData = (slide: string | SlideItem): SlideItem => {
+    if (typeof slide === 'string') {
+      const type = slide.match(/\.(mp4|webm|ogg|mov)/i) ? 'video' : 'image';
+      return { url: slide, type };
+    }
+    return slide;
+  };
+
   return (
     <div className={cn("relative overflow-hidden", className)}>
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex touch-pan-y -ml-4">
-          {slides.map((slide, index) => (
-            <div
-              className="flex-[0_0_80%] min-w-0 pl-4 md:flex-[0_0_60%] lg:flex-[0_0_50%]"
-              key={index}
-            >
-              <motion.div
-                className="relative h-[400px] md:h-[500px] rounded-[2rem] overflow-hidden cursor-zoom-in"
-                style={{
-                  scale: tweenValues[index] || 0.9,
-                  opacity: tweenValues[index] || 0.5,
-                }}
-                onClick={() => onItemClick?.(slide)}
+          {slides.map((slide, index) => {
+            const item = getSlideData(slide);
+            return (
+              <div
+                className="flex-[0_0_80%] min-w-0 pl-4 md:flex-[0_0_60%] lg:flex-[0_0_50%]"
+                key={index}
               >
-                <img
-                  src={slide}
-                  alt={`Slide ${index + 1}`}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-              </motion.div>
-            </div>
-          ))}
+                <motion.div
+                  className="relative h-[400px] md:h-[500px] rounded-[2rem] overflow-hidden cursor-zoom-in"
+                  style={{
+                    scale: tweenValues[index] || 0.9,
+                    opacity: tweenValues[index] || 0.5,
+                  }}
+                  onClick={() => onItemClick?.(item)}
+                >
+                  {item.type === 'video' ? (
+                    <>
+                        <video 
+                          src={item.url} 
+                          className="absolute inset-0 w-full h-full object-cover" 
+                          muted 
+                          loop 
+                          playsInline 
+                          onMouseOver={e => e.currentTarget.play()}
+                          onMouseOut={e => e.currentTarget.pause()}
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                           <div className="w-16 h-16 rounded-full bg-black/50 text-white flex items-center justify-center backdrop-blur-sm">
+                               <Play className="w-8 h-8 ml-1 fill-white" />
+                           </div>
+                        </div>
+                    </>
+                  ) : (
+                    <img
+                      src={item.url}
+                      alt={`Slide ${index + 1}`}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  )}
+                </motion.div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

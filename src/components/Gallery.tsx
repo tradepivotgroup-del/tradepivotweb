@@ -13,25 +13,25 @@ interface Project {
   id: string;
   name: string;
   description: string;
-  images: string[];
+  items: { url: string; type: 'image' | 'video' }[];
 }
 
 export default function Gallery() {
   const [loading, setLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<{ url: string; type: 'image' | 'video' } | null>(null);
 
   const [projects, setProjects] = useState<Project[]>([]);
 
   // Lock scroll when modal is open
   useEffect(() => {
-    if (selectedImage) {
+    if (selectedItem) {
       document.body.style.overflow = 'hidden';
       document.body.setAttribute('data-lenis-prevent', 'true');
     } else {
       document.body.style.overflow = 'unset';
       document.body.removeAttribute('data-lenis-prevent');
     }
-  }, [selectedImage]);
+  }, [selectedItem]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,14 +44,22 @@ export default function Gallery() {
 
         // Map items to projects
         const compiledProjects = projData.map((p: any) => {
-          const pImages = galData.filter((i: any) => i.projectId === p.id);
+          const projectMedia = galData.filter((i: any) => i.projectId === p.id);
+          const pItems = projectMedia.map((i: any) => {
+            const url = i.url || i.image;
+            return {
+              url: url,
+              type: i.type || (url?.match(/\.(mp4|webm|ogg|mov)/i) ? 'video' : 'image')
+            };
+          });
+          
           return {
             ...p,
-            images: pImages.map((i: any) => i.image),
+            items: pItems,
             sortDate: p.createdAt ? new Date(p.createdAt).getTime() : 
-                      (pImages.length > 0 ? new Date(pImages[0].createdAt).getTime() : 0)
+                      (projectMedia.length > 0 ? new Date(projectMedia[0].createdAt).getTime() : 0)
           };
-        }).filter((p: any) => p.images.length > 0);
+        }).filter((p: any) => p.items.length > 0);
 
         // Sort projects by newest first
         compiledProjects.sort((a, b) => b.sortDate - a.sortDate);
@@ -114,9 +122,9 @@ export default function Gallery() {
                 viewport={{ once: true }}
               >
                 <MotionCarousel 
-                  slides={project.images} 
+                  slides={project.items} 
                   options={{ loop: true, align: 'center' }}
-                  onItemClick={(img) => setSelectedImage(img)}
+                  onItemClick={(item) => setSelectedItem(item as any)}
                   className="w-full"
                 />
               </motion.div>
@@ -126,7 +134,7 @@ export default function Gallery() {
       </div>
 
       <AnimatePresence>
-        {selectedImage && (
+        {selectedItem && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -137,27 +145,36 @@ export default function Gallery() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                onClick={() => setSelectedImage(null)}
+                onClick={() => setSelectedItem(null)}
                 className="absolute inset-0 bg-[var(--background)]/90 backdrop-blur-xl"
             />
             
             <button 
-                onClick={() => setSelectedImage(null)}
+                onClick={() => setSelectedItem(null)}
                 className="absolute top-8 right-8 z-[110] w-12 h-12 rounded-full bg-[var(--foreground)]/10 hover:bg-[var(--foreground)] text-[var(--foreground)] hover:text-[var(--background)] flex items-center justify-center transition-all backdrop-blur-md"
             >
                 <X size={24} />
             </button>
 
             <motion.div
-              layoutId={selectedImage}
+              layoutId={selectedItem.url}
               className="relative w-full max-w-5xl aspect-video md:aspect-[4/3] max-h-[85vh] bg-[var(--card-bg)] rounded-2xl md:rounded-[2rem] overflow-hidden border border-[var(--border-subtle)] shadow-2xl z-[105]"
             >
-               <Image
-                 src={selectedImage}
-                 alt="Enlarged view"
-                 fill
-                 className="object-contain"
-               />
+               {selectedItem.type === 'video' ? (
+                 <video 
+                   src={selectedItem.url} 
+                   className="w-full h-full object-contain" 
+                   controls 
+                   autoPlay 
+                 />
+               ) : (
+                 <Image
+                   src={selectedItem.url}
+                   alt="Enlarged view"
+                   fill
+                   className="object-contain"
+                 />
+               )}
             </motion.div>
           </motion.div>
         )}
