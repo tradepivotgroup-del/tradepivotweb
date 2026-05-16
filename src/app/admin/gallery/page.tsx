@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { db, storage } from '@/lib/firebase';
 import { collection, addDoc, getDocs, deleteDoc, doc, setDoc, query, orderBy } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
-import { Trash2, Upload, Edit3 } from 'lucide-react';
+import { Trash2, Upload, Edit3, Play } from 'lucide-react';
 import Image from 'next/image';
 import { Progress, ProgressLabel, ProgressTrack, ProgressValue, ProgressIndicator } from '@/components/animate-ui/primitives/base/progress';
 import {
@@ -19,7 +19,8 @@ import {
 
 interface GalleryItem {
   id: string;
-  image: string;
+  url: string;
+  type: 'image' | 'video';
   projectId: string;
   createdAt: string;
 }
@@ -57,7 +58,17 @@ export default function GalleryManager() {
       // Fetch gallery items
       const q = query(collection(db, "gallery"), orderBy("createdAt", "desc"));
       const querySnapshot = await getDocs(q);
-      const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as GalleryItem));
+      const data = querySnapshot.docs.map(doc => {
+        const item = doc.data();
+        const url = item.url || item.image; // Fallback for old schema
+        return { 
+          id: doc.id, 
+          url: url,
+          type: item.type || (url?.match(/\.(mp4|webm|ogg|mov)/i) ? 'video' : 'image'),
+          projectId: item.projectId,
+          createdAt: item.createdAt
+        } as GalleryItem;
+      });
       setItems(data);
     } catch (err) {
       console.error(err);
@@ -157,13 +168,15 @@ export default function GalleryManager() {
       await uploadTask;
       const url = await getDownloadURL(uploadTask.snapshot.ref);
 
+      const fileType = file.type.startsWith('video/') ? 'video' : 'image';
       const docRef = await addDoc(collection(db, "gallery"), {
-        image: url,
+        url: url,
+        type: fileType,
         projectId: selectedProjectId,
         createdAt: new Date().toISOString()
       });
 
-      setItems([{ id: docRef.id, image: url, projectId: selectedProjectId, createdAt: new Date().toISOString() }, ...items]);
+      setItems([{ id: docRef.id, url: url, type: fileType, projectId: selectedProjectId, createdAt: new Date().toISOString() }, ...items]);
     } catch (err) {
       console.error(err);
       alert("Error uploading image");
@@ -173,17 +186,17 @@ export default function GalleryManager() {
     }
   };
 
-  const handleDelete = async (id: string, imageUrl: string) => {
-    if (!confirm("Remove this image from gallery?")) return;
+  const handleDelete = async (id: string, url: string) => {
+    if (!confirm("Remove this item from gallery?")) return;
     
     try {
       await deleteDoc(doc(db, "gallery", id));
-      const imageRef = ref(storage, imageUrl);
-      await deleteObject(imageRef).catch(e => console.log("Cleanup failed, image might not exist in storage or wrong path."));
+      const fileRef = ref(storage, url);
+      await deleteObject(fileRef).catch(e => console.log("Cleanup failed, item might not exist in storage or wrong path."));
       setItems(items.filter(item => item.id !== id));
     } catch (err) {
       console.error(err);
-      alert("Error deleting image.");
+      alert("Error deleting item.");
     }
   };
 
@@ -215,7 +228,7 @@ export default function GalleryManager() {
             
             <div className="relative w-full sm:w-auto">
                 <input 
-                    type="file" accept="image/*" 
+                    type="file" accept="image/*,video/*" 
                     onChange={handleUpload}
                     disabled={uploading || projects.length === 0}
                     className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full"
@@ -239,7 +252,7 @@ export default function GalleryManager() {
           <Progress value={uploadProgress} className="w-full md:w-[300px] space-y-2">
             <div className="flex items-center justify-between gap-1">
               <ProgressLabel className="text-[10px] uppercase font-black tracking-widest text-[var(--text-muted)]">
-                Uploading Image
+                Uploading Asset
               </ProgressLabel>
               <span className="text-[10px] font-black">
                 <ProgressValue /> %
@@ -288,16 +301,27 @@ export default function GalleryManager() {
                 
                 {projectItems.length === 0 ? (
                   <div className="text-center py-12 text-[var(--text-muted)] text-[11px] font-black uppercase tracking-widest">
-                    No images in this project yet.
+                    No assets in this project yet.
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       {projectItems.map((item) => (
                           <div key={item.id} className="relative group aspect-square rounded-lg overflow-hidden bg-[var(--background)] border border-[var(--border-subtle)]">
-                              <Image unoptimized src={item.image} alt="Gallery item" fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
+                              {item.type === 'video' ? (
+                                <>
+                                    <video src={item.url} className="w-full h-full object-cover" muted loop playsInline />
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                                       <div className="w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center backdrop-blur-sm">
+                                           <Play className="w-4 h-4 ml-1 fill-white" />
+                                       </div>
+                                    </div>
+                                </>
+                              ) : (
+                                <Image unoptimized src={item.url} alt="Gallery item" fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
+                              )}
                               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                   <button 
-                                      onClick={() => handleDelete(item.id, item.image)}
+                                      onClick={() => handleDelete(item.id, item.url)}
                                       className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center hover:scale-110 transition-transform"
                                   >
                                       <Trash2 size={16} />

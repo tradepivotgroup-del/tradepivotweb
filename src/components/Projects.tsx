@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
-import { ArrowUpRight, MapPin, X, Ruler, CheckCircle2, Maximize2 } from 'lucide-react';
+import { ArrowUpRight, MapPin, X, Ruler, CheckCircle2, Maximize2, Play } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import { db } from '@/lib/firebase';
@@ -17,6 +17,8 @@ interface Project {
   longDesc: string;
   image: string;
 }
+
+const isVideoUrl = (url: string) => url?.match(/\.(mp4|webm|ogg|mov)/i);
 
 export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -125,11 +127,26 @@ export default function Projects() {
                     onClick={() => setIsFullscreenImage(true)}
                     className="md:w-1/2 h-[40vh] md:h-auto min-h-[300px] relative bg-[var(--card-bg)] shrink-0 group cursor-zoom-in overflow-hidden flex"
                 >
-                    <img 
-                        src={selectedProject.image} 
-                        alt={selectedProject.title} 
-                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    />
+                    {isVideoUrl(selectedProject.image) ? (
+                        <>
+                            <video 
+                                src={selectedProject.image} 
+                                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                autoPlay muted loop playsInline
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                               <div className="w-16 h-16 rounded-full bg-black/50 text-white flex items-center justify-center backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                   <Play className="w-8 h-8 ml-1 fill-white" />
+                               </div>
+                            </div>
+                        </>
+                    ) : (
+                        <img 
+                            src={selectedProject.image} 
+                            alt={selectedProject.title} 
+                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        />
+                    )}
                     <div className="absolute inset-0 bg-[var(--background)]/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                        <div className="w-16 h-16 rounded-full bg-[var(--background)]/80 backdrop-blur-sm text-[var(--foreground)] flex items-center justify-center">
                           <Maximize2 className="w-6 h-6" />
@@ -215,12 +232,21 @@ export default function Projects() {
               layoutId={`project-img-full-${selectedProject.id}`}
               className="relative w-full max-w-6xl aspect-video md:aspect-[4/3] max-h-[90vh] bg-[var(--card-bg)] rounded-2xl md:rounded-[2rem] overflow-hidden border border-[var(--border-subtle)] shadow-2xl z-[125]"
             >
-               <Image
-                 src={selectedProject.image}
-                 alt={selectedProject.title}
-                 fill
-                 className="object-contain"
-               />
+               {isVideoUrl(selectedProject.image) ? (
+                 <video 
+                   src={selectedProject.image} 
+                   className="w-full h-full object-contain" 
+                   controls 
+                   autoPlay 
+                 />
+               ) : (
+                 <Image
+                   src={selectedProject.image}
+                   alt={selectedProject.title}
+                   fill
+                   className="object-contain"
+                 />
+               )}
             </motion.div>
           </motion.div>
         )}
@@ -250,12 +276,29 @@ function ProjectCard({ project: p, index: i, onClick }: { project: Project, inde
     >
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl mb-12 bg-[var(--card-bg)]">
             <motion.div style={{ y, scale: 1.15 }} className="w-full h-full">
-                <Image 
-                    src={p.image} 
-                    alt={p.title} 
-                    fill 
-                    className="object-cover group-hover:scale-105 transition-all duration-1000" 
-                />
+                {isVideoUrl(p.image) ? (
+                    <div className="relative w-full h-full">
+                        <video 
+                            src={p.image} 
+                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-1000" 
+                            muted loop playsInline 
+                            onMouseOver={e => e.currentTarget.play()} 
+                            onMouseOut={e => e.currentTarget.pause()} 
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                           <div className="w-12 h-12 rounded-full bg-black/50 text-white flex items-center justify-center backdrop-blur-sm">
+                               <Play className="w-5 h-5 ml-1 fill-white" />
+                           </div>
+                        </div>
+                    </div>
+                ) : (
+                    <Image 
+                        src={p.image} 
+                        alt={p.title} 
+                        fill 
+                        className="object-cover group-hover:scale-105 transition-all duration-1000" 
+                    />
+                )}
             </motion.div>
             <div className="absolute top-8 left-8 flex flex-wrap gap-2">
                 <span className="px-4 py-2 bg-[var(--background)]/80 backdrop-blur-md text-[9px] font-black uppercase tracking-widest rounded-full border border-[var(--border-subtle)] relative z-10 text-[var(--foreground)]">
